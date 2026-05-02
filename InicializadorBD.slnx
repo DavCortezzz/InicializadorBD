@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Escuela.Models/Escuela.Models.csproj" Id="c844f21f-1d12-42ec-b1e7-56d45a333a08" />
+  <Project Path="InicializadorBD/InicializadorBD.csproj" Id="a4af9265-46a7-4e23-b2f0-b8b7980e3f07" />
+</Solution>
