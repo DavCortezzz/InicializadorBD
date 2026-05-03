@@ -9,7 +9,7 @@ namespace Escuela.Models
         public string Nombre { get; set; }
 
         public int ProfesorId { get; set; }
-        public virtual Profesor Profesor { get; set; }
+        public virtual Usuario Usuario { get; set; }
         public virtual ICollection<Calificacion> Calificaciones { get; set; }
     }
 }

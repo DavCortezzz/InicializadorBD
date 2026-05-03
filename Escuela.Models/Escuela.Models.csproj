@@ -103,14 +103,16 @@
     <Compile Include="Migrations\202605012356336_Restricciones.Designer.cs">
       <DependentUpon>202605012356336_Restricciones.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605030326197_CambiosEnUsuario.cs" />
+    <Compile Include="Migrations\202605030326197_CambiosEnUsuario.Designer.cs">
+      <DependentUpon>202605030326197_CambiosEnUsuario.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Alumno.cs" />
     <Compile Include="Models\Asignatura.cs" />
     <Compile Include="Models\Asistencia.cs" />
     <Compile Include="Models\Calificacion.cs" />
-    <Compile Include="Models\Direccion.cs" />
     <Compile Include="Models\Grupo.cs" />
-    <Compile Include="Models\Profesor.cs" />
     <Compile Include="Models\Usuario.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -124,6 +126,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202605012356336_Restricciones.resx">
       <DependentUpon>202605012356336_Restricciones.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605030326197_CambiosEnUsuario.resx">
+      <DependentUpon>202605030326197_CambiosEnUsuario.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

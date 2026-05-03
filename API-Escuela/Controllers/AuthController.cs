@@ -30,7 +30,8 @@ namespace Escuela.Api.Controllers
                 {
                     Nombre = model.Nombre,
                     Correo = model.Correo,
-                    Contrasena = EncriptarSHA256(model.Contrasena)
+                    Contrasena = EncriptarSHA256(model.Contrasena),
+                    TipoUsuario = model.TipoUsuario
                 };
 
                 db.Usuarios.Add(user);
@@ -72,6 +73,7 @@ namespace Escuela.Api.Controllers
                     id = user.UsuarioId,
                     name = user.Nombre,
                     email = user.Correo,
+                    tipoUsuario = user.TipoUsuario,
                     token = token
                 });
             }
@@ -100,7 +102,7 @@ namespace Escuela.Api.Controllers
                 if (user == null)
                     return NotFound();
 
-                return Ok(new { id = user.UsuarioId, name = user.Nombre, correo = user.Correo });
+                return Ok(new { id = user.UsuarioId, name = user.Nombre, correo = user.Correo, tipoUsuario=user.TipoUsuario });
             }
             catch (Exception)
             {
@@ -165,27 +167,5 @@ namespace Escuela.Api.Controllers
         }
     }
 
-    // DTOs con validaciones básicas
-    public class UsuarioDto
-    {
-        [System.ComponentModel.DataAnnotations.Required]
-        public string Nombre { get; set; }
-
-        [System.ComponentModel.DataAnnotations.Required]
-        [System.ComponentModel.DataAnnotations.EmailAddress]
-        public string Correo { get; set; }
-
-        [System.ComponentModel.DataAnnotations.Required]
-        [System.ComponentModel.DataAnnotations.MinLength(6)]
-        public string Contrasena { get; set; }
-    }
-
-    public class LoginDto
-    {
-        [System.ComponentModel.DataAnnotations.Required]
-        public string Correo { get; set; }
-
-        [System.ComponentModel.DataAnnotations.Required]
-        public string Contrasena { get; set; }
-    }
+    
 }
