@@ -4,6 +4,7 @@ using System.Web.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Data.Entity.Infrastructure;
+using API_Escuela.Models;
 using Escuela.Models;
 
 namespace Escuela.Api.Controllers
@@ -31,7 +32,7 @@ namespace Escuela.Api.Controllers
                     Nombre = model.Nombre,
                     Correo = model.Correo,
                     Contrasena = EncriptarSHA256(model.Contrasena),
-                    TipoUsuario = model.TipoUsuario
+                    TipoUsuario = model.tipoUsuario
                 };
 
                 db.Usuarios.Add(user);
@@ -46,7 +47,7 @@ namespace Escuela.Api.Controllers
             catch (Exception ex)
             {
                 
-                return InternalServerError(new Exception("Ocurrió un error inesperado durante el registro."));
+                return InternalServerError(new Exception("Ocurrió un error inesperado durante el registro. "+ex));
             }
         }
 
@@ -71,8 +72,6 @@ namespace Escuela.Api.Controllers
                 return Ok(new
                 {
                     id = user.UsuarioId,
-                    name = user.Nombre,
-                    email = user.Correo,
                     tipoUsuario = user.TipoUsuario,
                     token = token
                 });
@@ -102,7 +101,7 @@ namespace Escuela.Api.Controllers
                 if (user == null)
                     return NotFound();
 
-                return Ok(new { id = user.UsuarioId, name = user.Nombre, correo = user.Correo, tipoUsuario=user.TipoUsuario });
+                return Ok(new { id = user.UsuarioId, name = user.Nombre, correo = user.Correo, tipoUsuario=user.TipoUsuario});
             }
             catch (Exception)
             {
@@ -130,7 +129,7 @@ namespace Escuela.Api.Controllers
                 if (!db.Usuarios.Any(u => u.UsuarioId == userId.Value))
                     return Content(System.Net.HttpStatusCode.NotFound, new { valid = false, message = "Usuario ya no existe." });
 
-                return Ok(new { valid = true, userId = userId.Value });
+                return Ok();
             }
             catch (Exception)
             {
