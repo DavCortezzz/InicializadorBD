@@ -11,7 +11,7 @@ namespace Escuela.Models
     {
         public int CalificacionId { get; set; }
 
-        public int AlumnoId { get; set; }
+        public string IdCURP { get; set; }
         public int AsignaturaId { get; set; }
 
         [Range(0, 10)]

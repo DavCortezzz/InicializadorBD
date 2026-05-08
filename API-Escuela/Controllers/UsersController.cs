@@ -6,10 +6,12 @@ using System.Text;
 using System.Data.Entity.Infrastructure;
 using API_Escuela.Models;
 using Escuela.Models;
+using System.Web.Services.Description;
+using API_Escuela.Controllers;
 
 namespace Escuela.Api.Controllers
 {
-    public class AuthController : ApiController
+    public class UsersController : BaseController
     {
         private EscuelaContext db = new EscuelaContext();
 
@@ -24,14 +26,14 @@ namespace Escuela.Api.Controllers
 
             try
             {
-                if (db.Usuarios.Any(u => u.Correo == model.Correo))
+                if (db.Usuarios.Any(u => u.Correo == model.correo))
                     return Content(System.Net.HttpStatusCode.Conflict, new { message = "El correo electrónico ya está registrado." });
 
                 var user = new Usuario
                 {
-                    Nombre = model.Nombre,
-                    Correo = model.Correo,
-                    Contrasena = EncriptarSHA256(model.Contrasena),
+                    Nombre = model.nombre,
+                    Correo = model.correo,
+                    Contrasena = EncriptarSHA256(model.contrasena),
                     TipoUsuario = model.tipoUsuario
                 };
 
@@ -61,8 +63,8 @@ namespace Escuela.Api.Controllers
 
             try
             {
-                string hash = EncriptarSHA256(model.Contrasena);
-                var user = db.Usuarios.FirstOrDefault(u => u.Correo == model.Correo && u.Contrasena == hash);
+                string hash = EncriptarSHA256(model.contrasena);
+                var user = db.Usuarios.FirstOrDefault(u => u.Correo == model.correo && u.Contrasena == hash);
 
                 if (user == null)
                     return Content(System.Net.HttpStatusCode.Unauthorized, new { message = "Credenciales incorrectas." });
@@ -79,6 +81,26 @@ namespace Escuela.Api.Controllers
             catch (Exception)
             {
                 return InternalServerError(new Exception("Error al procesar el inicio de sesión."));
+            }
+        }
+
+        // GET: api/users
+        [HttpGet]
+        [Route("api/users")]
+        public IHttpActionResult GetUsers()
+        {
+            try
+            {
+                Usuario user = ValidarAccesoDireccion();
+                if (user.TipoUsuario != "Direccion")
+                    return Content(System.Net.HttpStatusCode.Unauthorized, new { message = "No tiene permisos para esta acción." });
+
+                var users = db.Usuarios.Select(u => new { id = u.UsuarioId, name = u.Nombre, correo = u.Correo, tipoUsuario=u.TipoUsuario }).ToList();
+                return Ok(users);
+            }
+            catch (Exception)
+            {
+                return InternalServerError(new Exception("Error al obtener la lista de usuarios."));
             }
         }
 
@@ -109,33 +131,42 @@ namespace Escuela.Api.Controllers
             }
         }
 
-        [HttpGet]
-        [Route("api/verify")]
-        public IHttpActionResult Verify()
+
+        // Delete: api/deleteAccount
+        [HttpDelete]
+        [Route("api/deleteAccountbyID")]
+        public IHttpActionResult DeleteAccountByID(deleteUserDto model)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
-                var authHeader = Request.Headers.Authorization;
+                Usuario user = ValidarAccesoDireccion();
 
-                if (authHeader == null || string.IsNullOrEmpty(authHeader.Parameter))
-                    return Content(System.Net.HttpStatusCode.Unauthorized, new { valid = false, message = "No se proporcionó un token." });
+                if (user.TipoUsuario != "Direccion")
+                {
+                    return Content(System.Net.HttpStatusCode.Unauthorized, new { valid = false, message = "No tiene Permisos para esta acción" });
+                }
+                else {
+                    Usuario usuarioEliminado = db.Usuarios.Find(model.id);
+                    db.Usuarios.Remove(usuarioEliminado);
 
-                int? userId = JwtService.GetIdFromToken(authHeader.Parameter);
-
-                if (!userId.HasValue)
-                    return Content(System.Net.HttpStatusCode.Unauthorized, new { valid = false, message = "Token inválido o expirado." });
-
-               
-                if (!db.Usuarios.Any(u => u.UsuarioId == userId.Value))
-                    return Content(System.Net.HttpStatusCode.NotFound, new { valid = false, message = "Usuario ya no existe." });
-
-                return Ok();
+                    return Ok(new
+                    {
+                        message = $"Se elimino el usuario {usuarioEliminado.UsuarioId}\n" +
+                        $"Con el nombre de {usuarioEliminado.Nombre}"
+                    });
+                }
             }
             catch (Exception)
             {
-                return InternalServerError(new Exception("Error al verificar la autenticidad del token."));
+                return InternalServerError(new Exception("Error al eliminar la cuenta."));
             }
         }
+
+
+
 
         // POST: api/logout
         [HttpPost]

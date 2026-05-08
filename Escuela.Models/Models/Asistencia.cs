@@ -10,7 +10,7 @@ namespace Escuela.Models
     {
         public int AsistenciaId { get; set; }
 
-        public int AlumnoId { get; set; }
+        public string IdCURP { get; set; }
         public DateTime Fecha { get; set; }
         public int Estado { get; set; }
         public virtual Alumno Alumno { get; set; }

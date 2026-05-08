@@ -7,13 +7,13 @@ namespace Escuela.Models.Migrations
     using System.Resources;
     
     [GeneratedCode("EntityFramework.Migrations", "6.5.2")]
-    public sealed partial class CambiosEnUsuario : IMigrationMetadata
+    public sealed partial class Inicial : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(CambiosEnUsuario));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(Inicial));
         
         string IMigrationMetadata.Id
         {
-            get { return "202605030326197_CambiosEnUsuario"; }
+            get { return "202605071647032_Inicial"; }
         }
         
         string IMigrationMetadata.Source

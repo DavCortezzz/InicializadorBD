@@ -10,15 +10,15 @@ namespace API_Escuela.Models
     {
         [Required(ErrorMessage = "El nombre es obligatorio.")]
         [StringLength(100, ErrorMessage = "El nombre no puede exceder los 100 caracteres.")]
-        public string Nombre { get; set; }
+        public string nombre { get; set; }
 
         [Required(ErrorMessage = "El correo electrónico es indispensable.")]
         [EmailAddress(ErrorMessage = "El formato del correo no es válido.")]
-        public string Correo { get; set; }
+        public string correo { get; set; }
 
         [Required(ErrorMessage = "La contraseña es obligatoria.")]
         [MinLength(6, ErrorMessage = "La contraseña debe tener al menos 6 caracteres.")]
-        public string Contrasena { get; set; }
+        public string contrasena { get; set; }
 
         [Required(ErrorMessage = "Debes especificar el tipo de usuario.")]
         [RegularExpression("^(Direccion|Profesor)$",
@@ -30,9 +30,14 @@ namespace API_Escuela.Models
     {
         [Required(ErrorMessage = "El correo es necesario para iniciar sesión.")]
         [EmailAddress(ErrorMessage = "Formato de correo inválido.")]
-        public string Correo { get; set; }
+        public string correo { get; set; }
 
         [Required(ErrorMessage = "La contraseña es necesaria.")]
-        public string Contrasena { get; set; }
+        public string contrasena { get; set; }
+    }
+    public class deleteUserDto
+    {
+        [Required(ErrorMessage = "El id del usuario a eliminar es necesario para hacer la accion")]
+        public int id { get; set; }
     }
 }

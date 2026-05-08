@@ -95,17 +95,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EscuelaContext.cs" />
-    <Compile Include="Migrations\202605012350319_Inicial.cs" />
-    <Compile Include="Migrations\202605012350319_Inicial.Designer.cs">
-      <DependentUpon>202605012350319_Inicial.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202605012356336_Restricciones.cs" />
-    <Compile Include="Migrations\202605012356336_Restricciones.Designer.cs">
-      <DependentUpon>202605012356336_Restricciones.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202605030326197_CambiosEnUsuario.cs" />
-    <Compile Include="Migrations\202605030326197_CambiosEnUsuario.Designer.cs">
-      <DependentUpon>202605030326197_CambiosEnUsuario.cs</DependentUpon>
+    <Compile Include="Migrations\202605071647032_Inicial.cs" />
+    <Compile Include="Migrations\202605071647032_Inicial.Designer.cs">
+      <DependentUpon>202605071647032_Inicial.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Alumno.cs" />
@@ -121,14 +113,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202605012350319_Inicial.resx">
-      <DependentUpon>202605012350319_Inicial.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202605012356336_Restricciones.resx">
-      <DependentUpon>202605012356336_Restricciones.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202605030326197_CambiosEnUsuario.resx">
-      <DependentUpon>202605030326197_CambiosEnUsuario.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202605071647032_Inicial.resx">
+      <DependentUpon>202605071647032_Inicial.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

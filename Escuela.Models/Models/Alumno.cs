@@ -7,15 +7,14 @@ namespace Escuela.Models
 {
     public class Alumno
     {
-        public int AlumnoId { get; set; }
-
         [Required(ErrorMessage = "El nombre es obligatorio")]
         public string Nombre { get; set; }
-
+        
+        [Key]
         [Required]
         [Index(IsUnique = true)]
         [StringLength(18)]
-        public string CURP { get; set; }
+        public string idCURP { get; set; }
 
         public DateTime FechaNacimiento { get; set; }
 
