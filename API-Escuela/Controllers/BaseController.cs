@@ -39,10 +39,6 @@ namespace API_Escuela.Controllers
                 throw new HttpResponseException(Request.CreateResponse(
                     HttpStatusCode.NotFound, new { valid = false, message = "Usuario ya no existe." }));
 
-            if (user.TipoUsuario != "Direccion")
-                throw new HttpResponseException(Request.CreateResponse(
-                    HttpStatusCode.Unauthorized, new { valid = false, message = "No tiene permisos para esta acción" }));
-
             return user; 
         }
     }

@@ -19,6 +19,8 @@ namespace Escuela.Models
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             base.OnModelCreating(modelBuilder);
+
+
         }
     }
 }

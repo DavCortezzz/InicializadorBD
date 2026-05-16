@@ -14,5 +14,9 @@ namespace Escuela.Models
         public string Correo { get; set; }
         public string Contrasena { get; set; }
         public string TipoUsuario { get; set; }
+
+        public string CodigoVerificacion { get; set; }
+
+        public DateTime FechaExpiracionCodigo { get; set; }
     }
 }

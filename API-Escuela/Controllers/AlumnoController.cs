@@ -1,13 +1,15 @@
-﻿using System;
+﻿using API_Escuela.Models;
+using Escuela.Models;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
+using System.Data.Entity.Migrations;
 using System.Linq;
-using System.Web.Http;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Data.Entity.Infrastructure;
-using API_Escuela.Models;
-using Escuela.Models;
+using System.Web.Http;
 using System.Web.Services.Description;
-using System.Data.Entity.Migrations;
 
 namespace API_Escuela.Controllers
 {
@@ -15,9 +17,9 @@ namespace API_Escuela.Controllers
     {
         private EscuelaContext db = new EscuelaContext();
 
-        // POST: api/alumnos
+        // POST: api/alumnosRegistrar
         [HttpPost]
-        [Route("api/alumnos")]
+        [Route("api/alumnosRegistrar")]
         public IHttpActionResult RegisterAlumno(RegistroAlumnosDto model)
         {
 
@@ -37,14 +39,24 @@ namespace API_Escuela.Controllers
                     if (db.Alumnos.Any(a => a.idCURP == model.idCURP))
                         return Content(System.Net.HttpStatusCode.Conflict, new { message = "El CURP del alumno ya está registrado." });
 
+                    var grupo = db.Grupos.FirstOrDefault(g => g.Grado == model.gradoGrupo);
+                    if (grupo == null)
+                        return Content(System.Net.HttpStatusCode.BadRequest, new { message = "El grupo especificado no existe." });
+
                     var Alumno = new Alumno
                     {
                         Nombre = model.nombre,
+                        PrimerApellido = model.primerApellido,
+                        SegundoApellido = model.segundoApellido,
                         idCURP = model.idCURP,
                         FechaNacimiento = model.fechaNacimiento,
                         Tutor = model.tutor,
+                        PrimerApellidoTutor = model.primerApellidoTutor,
+                        SegundoApellidoTutor = model.segundoApellidoTutor,
                         TelefonoTutor = model.telefonoTutor,
-                        GrupoId = model.grupoId
+                        GrupoId = grupo.GrupoId,
+                        Direccion = model.direccion,
+                        ParentescoTutor = model.parentescoTutor
                     };
 
                     db.Alumnos.Add(Alumno);
@@ -64,113 +76,120 @@ namespace API_Escuela.Controllers
             }
         }
 
-        // POST: api/alumnos
+        // POST: api/alumnosModificar
         [HttpPost]
-        [Route("api/alumnos/:idCURP")]
+        [Route("api/alumnosModificar")]
         public IHttpActionResult UpdateAlumno(ModificarAlumnosDto model)
+        {
+            if (model == null || !ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                Usuario user = ValidarAccesoDireccion();
+                if (user == null || user.TipoUsuario != "Direccion")
+                    return Content(System.Net.HttpStatusCode.Unauthorized, new { message = "No tiene permisos." });
+
+                var alumnoAModificar = db.Alumnos.FirstOrDefault(a => a.idCURP == model.idCURP);
+
+                if (alumnoAModificar == null)
+                    return Content(System.Net.HttpStatusCode.NotFound, new { message = "El alumno no existe." });
+
+                if (!string.IsNullOrWhiteSpace(model.nuevaIdCURP) && model.nuevaIdCURP != model.idCURP)
+                {
+                    if (db.Alumnos.Any(a => a.idCURP == model.nuevaIdCURP))
+                        return Content(System.Net.HttpStatusCode.Conflict, new { message = "La nueva CURP ya existe." });
+
+                    db.Database.ExecuteSqlCommand(
+                        "UPDATE dbo.Alumno SET idCURP = @nueva WHERE idCURP = @vieja",
+                        new System.Data.SqlClient.SqlParameter("@nueva", model.nuevaIdCURP),
+                        new System.Data.SqlClient.SqlParameter("@vieja", model.idCURP)
+                    );
+
+                    alumnoAModificar = db.Alumnos.FirstOrDefault(a => a.idCURP == model.nuevaIdCURP);
+                }
+
+                if (!string.IsNullOrWhiteSpace(model.nombre)) alumnoAModificar.Nombre = model.nombre;
+                if (!string.IsNullOrWhiteSpace(model.primerApellido)) alumnoAModificar.PrimerApellido = model.primerApellido;
+                if (!string.IsNullOrWhiteSpace(model.segundoApellido)) alumnoAModificar.SegundoApellido = model.segundoApellido;
+                if (model.fechaNacimiento != null) alumnoAModificar.FechaNacimiento = model.fechaNacimiento;
+                if (!string.IsNullOrWhiteSpace(model.tutor)) alumnoAModificar.Tutor = model.tutor;
+                if (!string.IsNullOrWhiteSpace(model.telefonoTutor)) alumnoAModificar.TelefonoTutor = model.telefonoTutor;
+                if (!string.IsNullOrWhiteSpace(model.direccion)) alumnoAModificar.Direccion = model.direccion;
+
+                if (!string.IsNullOrEmpty(model.gradoGrupo))
+                {
+                    var grupo = db.Grupos.FirstOrDefault(g => g.Grado == model.gradoGrupo);
+                    if (grupo != null) alumnoAModificar.GrupoId = grupo.GrupoId;
+                }
+
+                db.Entry(alumnoAModificar).State = System.Data.Entity.EntityState.Modified;
+                db.SaveChanges();
+
+                return Ok(new { message = "Alumno actualizado correctamente." });
+            }
+            catch (Exception ex)
+            {
+                var errorReal = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message ?? ex.Message;
+                return InternalServerError(new Exception("Error al guardar: " + errorReal));
+            }
+        }
+
+        //Post: api/alumnos
+        [HttpPost]
+        [Route("api/alumnos")]
+        public IHttpActionResult PostAlumnos(BuscarAlumnosByGroupIdONombreCURPDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
-
                 Usuario user = ValidarAccesoDireccion();
+                if (user == null) return Unauthorized();
 
-                if (user == null || user.TipoUsuario != "Direccion")
-                    return Content(System.Net.HttpStatusCode.Unauthorized, new { valid = false, message = "No tiene permisos para esta acción." });
+               
 
-                var alumnoAModificar = db.Alumnos.FirstOrDefault(a => a.idCURP == model.idCURP);
-                if (alumnoAModificar == null)
-                    return Content(System.Net.HttpStatusCode.NotFound, new { message = "El alumno con la CURP proporcionada no existe." });
+                var query = db.Alumnos.AsQueryable();
 
-                if (!string.IsNullOrWhiteSpace(model.nuevaIdCURP) && model.nuevaIdCURP != model.idCURP)
+                if (!string.IsNullOrEmpty(model.gradoGrupo))
                 {
-                    if (db.Alumnos.Any(a => a.idCURP == model.nuevaIdCURP))
-                        return Content(System.Net.HttpStatusCode.Conflict, new { message = "La nueva CURP ya está registrada por otro alumno." });
-
-                    alumnoAModificar.idCURP = model.nuevaIdCURP;
+                    query = query.Where(a => a.Grupo.Grado == model.gradoGrupo);
                 }
 
-                if (!string.IsNullOrWhiteSpace(model.nombre))
-                    alumnoAModificar.Nombre = model.nombre;
-
-                if (model.fechaNacimiento != null)
-                    alumnoAModificar.FechaNacimiento = model.fechaNacimiento;
-
-                if (!string.IsNullOrWhiteSpace(model.tutor))
-                    alumnoAModificar.Tutor = model.tutor;
-
-                if (!string.IsNullOrWhiteSpace(model.telefonoTutor))
-                    alumnoAModificar.TelefonoTutor = model.telefonoTutor;
-
-                if (model.grupoId != null)
-                    alumnoAModificar.GrupoId = model.grupoId;
-
-                db.SaveChanges();
-
-                return Ok(new
+                if (!string.IsNullOrEmpty(model.nombreCURP))
                 {
-                    message = "Alumno actualizado correctamente.",
-                    alumno = alumnoAModificar
-                });
+                    string busqueda = model.nombreCURP.ToLower().Trim();
+                    query = query.Where(a =>
+                        (a.Nombre + " " + a.PrimerApellido + " " + a.SegundoApellido).ToLower().Contains(busqueda) ||
+                        a.idCURP.ToLower().Contains(busqueda)
+                    );
+                }
+
+                var resultado = query
+                    .OrderBy(a => a.Nombre)
+                    .Select(a => new AlumnoGridModel
+                    {
+                        idCURP = a.idCURP,
+                        Nombre = a.Nombre + " " + a.PrimerApellido + " " + a.SegundoApellido,
+                        Tutor = a.Tutor + " " + a.PrimerApellidoTutor + " " + a.SegundoApellidoTutor,
+                        TelefonoTutor = a.TelefonoTutor,
+                        gradoGrupo = a.Grupo.Grado
+                    })
+                    .ToList();
+
+                return Ok(resultado);
             }
             catch (Exception ex)
             {
-                return InternalServerError(new Exception("Ocurrió un error inesperado al procesar la solicitud."));
-            }
-        }
-
-        //Get: api/alumnos
-        [HttpGet]
-        [Route("api/alumnos")]
-        public IHttpActionResult GetAlumnos() {
-            try
-            {
-                Usuario user = ValidarAccesoDireccion();
-                if (user.TipoUsuario != "Direccion")
-                    return Content(System.Net.HttpStatusCode.Unauthorized, new { message = "No tiene permisos para esta acción." });
-
-                var Alumnos = db.Alumnos.Select(a => new {a.idCURP ,  a.Nombre,a.FechaNacimiento,a.Grupo,a.TelefonoTutor,a.Tutor }).ToList();
-                return Ok(Alumnos);
-            }
-            catch (Exception)
-            {
-                return InternalServerError(new Exception("Error al obtener la lista de usuarios."));
-            }
-        }
-
-        //Get: api/alumnos/:grupoId
-        [HttpGet]
-        [Route("api/alumnos/:grupoId")]
-        public IHttpActionResult GetAlumnosByGroupId(ObtenerAlumnosPorGrupoDto model ) {
-
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            try
-            {
-                Usuario user = ValidarAccesoDireccion();
-
-                var grupo = db.Grupos.Find(model.grupoId);
-                if (user == null)
-                    return NotFound();
-                if (grupo == null)
-                    return NotFound();
-
-                var Alumnos = db.Alumnos.Select(a => new { a.idCURP, a.Nombre, a.FechaNacimiento, a.Grupo, a.TelefonoTutor, a.Tutor }).Where(a => a.Grupo.GrupoId == model.grupoId ).ToList();
-                return Ok(Alumnos);
-            }
-            catch (Exception)
-            {
-                return InternalServerError(new Exception("Error al obtener la lista de usuarios."));
+                return InternalServerError(new Exception("Error al filtrar alumnos: " + ex.Message));
             }
         }
 
         //Get: api/alumnos/:idCURP
         [HttpGet]
-        [Route("api/alumnos/:idCURP")]
-        public IHttpActionResult GetAlumnosByIdCURP(ObtenerAlumnoPorIdCURP model)
+        [Route("api/alumnos/{idCURP}")]
+        public IHttpActionResult GetAlumnosByIdCURP([FromUri] ObtenerAlumnoPorIdCURP model)
         {
 
             if (!ModelState.IsValid)
@@ -179,51 +198,74 @@ namespace API_Escuela.Controllers
             try
             {
                 Usuario user = ValidarAccesoDireccion();
-
-                var alumno = db.Alumnos.Find(model.idCURP);
-                if (alumno == null)
+                var alumnos = db.Alumnos.Where(a => a.idCURP == model.idCURP)
+                                    .Select(a => new AlumnoObtenidoModel
+                                    {
+                                        idCURP = a.idCURP,
+                                        nombre = a.Nombre,
+                                        primerApellido = a.PrimerApellido,
+                                        segundoApellido = a.SegundoApellido,
+                                        tutor = a.Tutor,
+                                        primerApellidoTutor = a.PrimerApellidoTutor,
+                                        segundoApellidoTutor = a.SegundoApellidoTutor,
+                                        telefonoTutor = a.TelefonoTutor,
+                                        gradoGrupo = a.Grupo.Grado,
+                                        fechaNacimiento = a.FechaNacimiento,
+                                        direccion = a.Direccion,
+                                        parentescoTutor = a.ParentescoTutor,
+                                    }).ToList()[0];
+                if (alumnos == null)
                     return NotFound();
 
-                return Ok(alumno);
+                return Ok(alumnos);
             }
             catch (Exception)
             {
                 return InternalServerError(new Exception("Error al obtener la lista de usuarios."));
             }
         }
+
         //Delete: api/alumnos
         [HttpDelete]
         [Route("api/alumnos")]
-        public IHttpActionResult DeleteAlumnoById(ObtenerAlumnoPorIdCURP model) {
-        if (!ModelState.IsValid)
+        public IHttpActionResult DeleteAlumnoById(ObtenerAlumnoPorIdCURP model)
+        {
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             try
             {
                 Usuario user = ValidarAccesoDireccion();
-
-                if (user.TipoUsuario != "Direccion")
+                if (user == null || user.TipoUsuario != "Direccion")
                 {
-                    return Content(System.Net.HttpStatusCode.Unauthorized, new { valid = false, message = "No tiene Permisos para esta acción" });
+                    return Content(System.Net.HttpStatusCode.Unauthorized,
+                        new { valid = false, message = "No tiene permisos para esta acción." });
                 }
-                else {
 
-                    Alumno alumnoAEliminar = db.Alumnos.Find(model.idCURP);
-                    db.Alumnos.Remove(alumnoAEliminar);
+                var alumnoAEliminar = db.Alumnos.FirstOrDefault(a => a.idCURP == model.idCURP);
 
-                    return Ok(new
-                    {
-                        message = $"Se elimino el usuario {alumnoAEliminar.idCURP}\n" +
-                        $"Con el nombre de {alumnoAEliminar.Nombre}"
-                    });
-                }
+                if (alumnoAEliminar == null)
+                    return Content(System.Net.HttpStatusCode.NotFound,
+                        new { message = "El alumno no existe en la base de datos." });
+
+                db.Alumnos.Remove(alumnoAEliminar);
+
+
+                db.SaveChanges();
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Se eliminó correctamente al alumno con CURP: {alumnoAEliminar.idCURP}",
+                    nombre = $"{alumnoAEliminar.Nombre} {alumnoAEliminar.PrimerApellido}"
+                });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return InternalServerError(new Exception("Error al eliminar la cuenta."));
+                var errorReal = ex.InnerException?.InnerException?.Message ?? ex.InnerException?.Message ?? ex.Message;
+                return InternalServerError(new Exception("Error crítico al eliminar: " + errorReal));
             }
+
         }
-
-
     }
 }

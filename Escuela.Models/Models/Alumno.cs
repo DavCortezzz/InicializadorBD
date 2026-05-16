@@ -9,7 +9,10 @@ namespace Escuela.Models
     {
         [Required(ErrorMessage = "El nombre es obligatorio")]
         public string Nombre { get; set; }
-        
+
+        public string PrimerApellido { get; set; }
+        public string SegundoApellido { get; set; }
+
         [Key]
         [Required]
         [Index(IsUnique = true)]
@@ -19,8 +22,16 @@ namespace Escuela.Models
         public DateTime FechaNacimiento { get; set; }
 
         public string Tutor { get; set; }
+        
+        public string PrimerApellidoTutor { get; set; }
+
+        public string SegundoApellidoTutor { get; set; }
+        public string Direccion { get; set; }
+
+        public string ParentescoTutor { get; set; }
 
         public string TelefonoTutor { get; set; }
+
 
         public int GrupoId { get; set; }
         public virtual Grupo Grupo { get; set; }

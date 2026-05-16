@@ -13,8 +13,14 @@
                     {
                         idCURP = c.String(nullable: false, maxLength: 18),
                         Nombre = c.String(nullable: false),
+                        PrimerApellido = c.String(),
+                        SegundoApellido = c.String(),
                         FechaNacimiento = c.DateTime(nullable: false),
                         Tutor = c.String(),
+                        PrimerApellidoTutor = c.String(),
+                        SegundoApellidoTutor = c.String(),
+                        Direccion = c.String(),
+                        ParentescoTutor = c.String(),
                         TelefonoTutor = c.String(),
                         GrupoId = c.Int(nullable: false),
                     })
@@ -41,10 +47,13 @@
                         AsignaturaId = c.Int(nullable: false, identity: true),
                         Nombre = c.String(),
                         UsuarioId = c.Int(nullable: false),
+                        GrupoId = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.AsignaturaId)
-                .ForeignKey("dbo.Usuario", t => t.UsuarioId, cascadeDelete: true)
-                .Index(t => t.UsuarioId);
+                .ForeignKey("dbo.Grupo", t => t.GrupoId, cascadeDelete: true)
+                .ForeignKey("dbo.Usuario", t => t.UsuarioId)
+                .Index(t => t.UsuarioId)
+                .Index(t => t.GrupoId);
             
             CreateTable(
                 "dbo.Calificacion",
@@ -59,7 +68,7 @@
                         CalificacionFinal = c.Int(nullable: false),
                     })
                 .PrimaryKey(t => t.CalificacionId)
-                .ForeignKey("dbo.Alumno", t => t.IdCURP)
+                .ForeignKey("dbo.Alumno", t => t.IdCURP,cascadeDelete:true)
                 .ForeignKey("dbo.Asignatura", t => t.AsignaturaId, cascadeDelete: true)
                 .Index(t => t.IdCURP)
                 .Index(t => t.AsignaturaId);
@@ -83,10 +92,10 @@
                         AsistenciaId = c.Int(nullable: false, identity: true),
                         IdCURP = c.String(maxLength: 18),
                         Fecha = c.DateTime(nullable: false),
-                        Estado = c.Int(nullable: false),
+                        Estado = c.String(),
                     })
                 .PrimaryKey(t => t.AsistenciaId)
-                .ForeignKey("dbo.Alumno", t => t.IdCURP)
+                .ForeignKey("dbo.Alumno", t => t.IdCURP,cascadeDelete: true)
                 .Index(t => t.IdCURP);
             
         }
@@ -95,12 +104,14 @@
         {
             DropForeignKey("dbo.Asistencia", "IdCURP", "dbo.Alumno");
             DropForeignKey("dbo.Asignatura", "UsuarioId", "dbo.Usuario");
+            DropForeignKey("dbo.Asignatura", "GrupoId", "dbo.Grupo");
             DropForeignKey("dbo.Calificacion", "AsignaturaId", "dbo.Asignatura");
             DropForeignKey("dbo.Calificacion", "IdCURP", "dbo.Alumno");
             DropForeignKey("dbo.Alumno", "GrupoId", "dbo.Grupo");
             DropIndex("dbo.Asistencia", new[] { "IdCURP" });
             DropIndex("dbo.Calificacion", new[] { "AsignaturaId" });
             DropIndex("dbo.Calificacion", new[] { "IdCURP" });
+            DropIndex("dbo.Asignatura", new[] { "GrupoId" });
             DropIndex("dbo.Asignatura", new[] { "UsuarioId" });
             DropIndex("dbo.Alumno", new[] { "GrupoId" });
             DropIndex("dbo.Alumno", new[] { "idCURP" });
