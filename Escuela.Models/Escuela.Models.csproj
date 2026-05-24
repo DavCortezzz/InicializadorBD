@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EscuelaContext.cs" />
+<<<<<<< Updated upstream
     <Compile Include="Migrations\202605012350319_Inicial.cs" />
     <Compile Include="Migrations\202605012350319_Inicial.Designer.cs">
       <DependentUpon>202605012350319_Inicial.cs</DependentUpon>
@@ -59,6 +60,11 @@
     <Compile Include="Migrations\202605012356336_Restricciones.cs" />
     <Compile Include="Migrations\202605012356336_Restricciones.Designer.cs">
       <DependentUpon>202605012356336_Restricciones.cs</DependentUpon>
+=======
+    <Compile Include="Migrations\202605221854195_iniciar.cs" />
+    <Compile Include="Migrations\202605221854195_iniciar.Designer.cs">
+      <DependentUpon>202605221854195_iniciar.cs</DependentUpon>
+>>>>>>> Stashed changes
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Alumno.cs" />
@@ -75,11 +81,16 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+<<<<<<< Updated upstream
     <EmbeddedResource Include="Migrations\202605012350319_Inicial.resx">
       <DependentUpon>202605012350319_Inicial.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202605012356336_Restricciones.resx">
       <DependentUpon>202605012356336_Restricciones.cs</DependentUpon>
+=======
+    <EmbeddedResource Include="Migrations\202605221854195_iniciar.resx">
+      <DependentUpon>202605221854195_iniciar.cs</DependentUpon>
+>>>>>>> Stashed changes
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -17,6 +17,7 @@ namespace Escuela.Models
         [StringLength(18)]
         public string CURP { get; set; }
 
+        [Column(TypeName = "date")]
         public DateTime FechaNacimiento { get; set; }
 
         public string Tutor { get; set; }

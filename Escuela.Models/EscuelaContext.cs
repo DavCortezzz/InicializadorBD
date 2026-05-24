@@ -19,6 +19,12 @@ namespace Escuela.Models
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+            modelBuilder.Entity<Asignatura>()
+                .HasRequired(a => a.Usuario)
+                .WithMany()
+                .HasForeignKey(a => a.UsuarioId)
+                .WillCascadeOnDelete(false);
+
             base.OnModelCreating(modelBuilder);
         }
     }

@@ -90,12 +90,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Escuela.Models\Escuela.Models.csproj">
-      <Project>{c844f21f-1d12-42ec-b1e7-56d45a333a08}</Project>
-      <Name>Escuela.Models</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.8">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.8 %28x86 y x64%29</ProductName>
